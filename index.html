@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Multiplication Game</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #071b3a, #0b3a68, #08233f);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .screen {
+      width: min(950px, 100%);
+      min-height: 560px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 28px;
+      padding: 34px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(14px);
+      display: none;
+    }
+
+    .active {
+      display: block;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .small-label {
+      display: inline-block;
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: rgba(0, 212, 255, 0.15);
+      border: 1px solid rgba(0, 212, 255, 0.5);
+      color: #9eefff;
+      font-weight: bold;
+      letter-spacing: 1px;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 7vw, 78px);
+      line-height: 0.95;
+      letter-spacing: 1px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 34px;
+    }
+
+    .gold {
+      color: #ffd75e;
+    }
+
+    .subtitle {
+      margin: 20px auto 30px;
+      max-width: 680px;
+      color: #d9ecff;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 28px auto;
+      max-width: 760px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 15px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.92);
+      font-size: 17px;
+      color: #08233f;
+      outline: none;
+    }
+
+    button {
+      border: none;
+      border-radius: 16px;
+      padding: 14px 24px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #08233f;
+      background: linear-gradient(135deg, #ffe083, #ffbd2e);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    .secondary-btn {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    .game-top {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 18px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #aee8ff;
+      font-weight: bold;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      margin-top: 6px;
+      font-size: 30px;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    .question-card {
+      margin: 24px auto;
+      max-width: 720px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 26px;
+      padding: 35px 24px;
+      text-align: center;
+    }
+
+    .question-text {
+      font-size: clamp(46px, 8vw, 90px);
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 28px;
+    }
+
+    .answer-row {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    #answerInput {
+      max-width: 220px;
+      text-align: center;
+      font-size: 34px;
+      font-weight: bold;
+    }
+
+    .feedback {
+      min-height: 36px;
+      margin-top: 18px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .correct {
+      color: #70ffb1;
+    }
+
+    .wrong {
+      color: #ff9f9f;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(160px, 1fr));
+      gap: 14px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .choice-btn {
+      background: rgba(255, 255, 255, 0.92);
+      color: #08233f;
+      font-size: 28px;
+    }
+
+    .summary-card {
+      max-width: 700px;
+      margin: 24px auto;
+      background: rgba(255, 255, 255, 0.13);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 26px;
+      padding: 28px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+      font-size: 20px;
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+    }
+
+    .big-score {
+      font-size: 68px;
+      font-weight: bold;
+      color: #ffd75e;
+      margin: 10px 0;
+    }
+
+    .message-box {
+      margin: 18px auto;
+      max-width: 680px;
+      background: rgba(0, 0, 0, 0.22);
+      border-radius: 18px;
+      padding: 15px;
+      color: #d9ecff;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 720px) {
+      .screen {
+        padding: 22px;
+      }
+
+      .form-grid,
+      .game-top {
+        grid-template-columns: 1fr;
+      }
+
+      .choices {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <section id="startScreen" class="screen active center">
+    <div class="small-label">INTERACTIVE MATHEMATICS GAME</div>
+
+    <h1>
+      MULTIPLICATION<br>
+      <span class="gold">CHALLENGE</span>
+    </h1>
+
+    <p class="subtitle">
+      Answer as many multiplication questions as you can. Your final score will be shown at the end.
+      Later, we will connect this game to Google Sheets so your teacher can receive the results.
+    </p>
+
+    <div class="form-grid">
+      <input id="firstName" type="text" placeholder="First Name" />
+      <input id="lastName" type="text" placeholder="Last Name" />
+      <input id="grade" type="text" placeholder="Grade / Section" />
+    </div>
+
+    <div class="form-grid">
+      <select id="difficulty">
+        <option value="easy">Easy: 1 to 9</option>
+        <option value="medium">Medium: 2 to 12</option>
+        <option value="hard">Hard: 6 to 20</option>
+      </select>
+
+      <select id="gameMode">
+        <option value="input">Type the Answer</option>
+        <option value="choice">Multiple Choice</option>
+      </select>
+
+      <select id="totalQuestions">
+        <option value="10">10 Questions</option>
+        <option value="15">15 Questions</option>
+        <option value="20">20 Questions</option>
+      </select>
+    </div>
+
+    <button onclick="startGame()">START GAME</button>
+  </section>
+
+  <section id="gameScreen" class="screen">
+    <div class="game-top">
+      <div class="stat-box">
+        <div class="stat-label">Question</div>
+        <div id="questionNumber" class="stat-value">1</div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-label">Score</div>
+        <div id="scoreDisplay" class="stat-value">0</div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-label">Correct</div>
+        <div id="correctDisplay" class="stat-value">0</div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-label">Time</div>
+        <div id="timerDisplay" class="stat-value">30</div>
+      </div>
+    </div>
+
+    <div class="question-card">
+      <div id="questionText" class="question-text">6 × 7</div>
+
+      <div id="inputArea" class="answer-row">
+        <input id="answerInput" type="number" placeholder="?" onkeydown="handleEnter(event)" />
+        <button onclick="checkTypedAnswer()">CHECK</button>
+      </div>
+
+      <div id="choiceArea" class="choices" style="display:none;"></div>
+
+      <div id="feedback" class="feedback"></div>
+    </div>
+
+    <div class="center">
+      <button class="secondary-btn" onclick="quitGame()">QUIT GAME</button>
+    </div>
+  </section>
+
+  <section id="resultScreen" class="screen center">
+    <div class="small-label">GAME COMPLETED</div>
+
+    <h2>Great work, <span id="studentNameResult">Student</span>!</h2>
+
+    <div class="big-score" id="finalPercentage">0%</div>
+
+    <div class="summary-card">
+      <div class="summary-row">
+        <span>Final Score</span>
+        <strong id="finalScore">0 / 10</strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Correct Answers</span>
+        <strong id="finalCorrect">0</strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Wrong Answers</span>
+        <strong id="finalWrong">0</strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Remarks</span>
+        <strong id="finalRemarks">Good effort</strong>
+      </div>
+    </div>
+
+    <div class="message-box" id="submitMessage">
+      Score submission is not connected yet. Next, we will add the Google Apps Script URL so the result can be saved in Google Sheets.
+    </div>
+
+    <button onclick="restartGame()">PLAY AGAIN</button>
+  </section>
+
+  <script>
+    // Later, paste your Google Apps Script Web App URL here.
+    const GOOGLE_SCRIPT_URL = "";
+
+    let firstName = "";
+    let lastName = "";
+    let grade = "";
+    let difficulty = "easy";
+    let gameMode = "input";
+    let totalQuestions = 10;
+
+    let currentQuestion = 0;
+    let correctCount = 0;
+    let score = 0;
+    let num1 = 0;
+    let num2 = 0;
+    let correctAnswer = 0;
+    let answered = false;
+    let timeLeft = 30;
+    let timer = null;
+
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(screen => {
+        screen.classList.remove("active");
+      });
+
+      document.getElementById(id).classList.add("active");
+    }
+
+    function startGame() {
+      firstName = document.getElementById("firstName").value.trim();
+      lastName = document.getElementById("lastName").value.trim();
+      grade = document.getElementById("grade").value.trim();
+      difficulty = document.getElementById("difficulty").value;
+      gameMode = document.getElementById("gameMode").value;
+      totalQuestions = Number(document.getElementById("totalQuestions").value);
+
+      if (!firstName || !lastName || !grade) {
+        alert("Please enter your first name, last name, and grade/section.");
+        return;
+      }
+
+      currentQuestion = 0;
+      correctCount = 0;
+      score = 0;
+
+      showScreen("gameScreen");
+      createQuestion();
+    }
+
+    function createQuestion() {
+      answered = false;
+      currentQuestion++;
+      timeLeft = 30;
+
+      clearInterval(timer);
+
+      const range = getRange();
+
+      num1 = randomInt(range.min, range.max);
+      num2 = randomInt(range.min, range.max);
+      correctAnswer = num1 * num2;
+
+      document.getElementById("questionNumber").textContent = currentQuestion + " / " + totalQuestions;
+      document.getElementById("scoreDisplay").textContent = score;
+      document.getElementById("correctDisplay").textContent = correctCount;
+      document.getElementById("timerDisplay").textContent = timeLeft;
+      document.getElementById("questionText").textContent = num1 + " × " + num2;
+
+      document.getElementById("feedback").textContent = "";
+      document.getElementById("feedback").className = "feedback";
+
+      if (gameMode === "input") {
+        document.getElementById("inputArea").style.display = "flex";
+        document.getElementById("choiceArea").style.display = "none";
+        document.getElementById("answerInput").value = "";
+
+        setTimeout(() => {
+          document.getElementById("answerInput").focus();
+        }, 100);
+      } else {
+        document.getElementById("inputArea").style.display = "none";
+        document.getElementById("choiceArea").style.display = "grid";
+        createChoices();
+      }
+
+      startTimer();
+    }
+
+    function getRange() {
+      if (difficulty === "easy") {
+        return { min: 1, max: 9 };
+      }
+
+      if (difficulty === "medium") {
+        return { min: 2, max: 12 };
+      }
+
+      return { min: 6, max: 20 };
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function startTimer() {
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timerDisplay").textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+
+          if (!answered) {
+            answered = true;
+            showFeedback(false, "Time is up! Answer: " + correctAnswer);
+
+            setTimeout(nextQuestionOrFinish, 1200);
+          }
+        }
+      }, 1000);
+    }
+
+    function handleEnter(event) {
+      if (event.key === "Enter") {
+        checkTypedAnswer();
+      }
+    }
+
+    function checkTypedAnswer() {
+      if (answered) {
+        return;
+      }
+
+      const answerBox = document.getElementById("answerInput");
+
+      if (answerBox.value.trim() === "") {
+        alert("Please type your answer.");
+        return;
+      }
+
+      const studentAnswer = Number(answerBox.value);
+
+      processAnswer(studentAnswer);
+    }
+
+    function createChoices() {
+      const choiceArea = document.getElementById("choiceArea");
+      choiceArea.innerHTML = "";
+
+      const choices = new Set();
+
+      choices.add(correctAnswer);
+
+      while (choices.size < 4) {
+        const variation = randomInt(-12, 12);
+        const wrong = correctAnswer + variation;
+
+        if (wrong > 0 && wrong !== correctAnswer) {
+          choices.add(wrong);
+        }
+      }
+
+      Array.from(choices)
+        .sort(() => Math.random() - 0.5)
+        .forEach(choice => {
+          const btn = document.createElement("button");
+          btn.className = "choice-btn";
+          btn.textContent = choice;
+
+          btn.onclick = () => {
+            processAnswer(choice);
+          };
+
+          choiceArea.appendChild(btn);
+        });
+    }
+
+    function processAnswer(studentAnswer) {
+      if (answered) {
+        return;
+      }
+
+      answered = true;
+      clearInterval(timer);
+
+      if (studentAnswer === correctAnswer) {
+        correctCount++;
+        score += 10;
+        showFeedback(true, "Correct!");
+      } else {
+        showFeedback(false, "Not correct. Answer: " + correctAnswer);
+      }
+
+      document.getElementById("scoreDisplay").textContent = score;
+      document.getElementById("correctDisplay").textContent = correctCount;
+
+      setTimeout(nextQuestionOrFinish, 1200);
+    }
+
+    function showFeedback(isCorrect, message) {
+      const feedback = document.getElementById("feedback");
+
+      feedback.textContent = message;
+      feedback.className = isCorrect ? "feedback correct" : "feedback wrong";
+    }
+
+    function nextQuestionOrFinish() {
+      if (currentQuestion >= totalQuestions) {
+        finishGame();
+      } else {
+        createQuestion();
+      }
+    }
+
+    function finishGame() {
+      clearInterval(timer);
+
+      const wrongCount = totalQuestions - correctCount;
+      const percentage = Math.round((correctCount / totalQuestions) * 100);
+      const remarks = getRemarks(percentage);
+
+      document.getElementById("studentNameResult").textContent = firstName;
+      document.getElementById("finalPercentage").textContent = percentage + "%";
+      document.getElementById("finalScore").textContent = score + " / " + (totalQuestions * 10);
+      document.getElementById("finalCorrect").textContent = correctCount;
+      document.getElementById("finalWrong").textContent = wrongCount;
+      document.getElementById("finalRemarks").textContent = remarks;
+
+      showScreen("resultScreen");
+
+      submitResultToGoogleSheet(percentage, remarks);
+    }
+
+    function getRemarks(percentage) {
+      if (percentage >= 91) {
+        return "Excellent";
+      }
+
+      if (percentage >= 81) {
+        return "Awesome";
+      }
+
+      if (percentage >= 71) {
+        return "Fantastic";
+      }
+
+      if (percentage >= 60) {
+        return "Good effort";
+      }
+
+      return "Try again";
+    }
+
+    function submitResultToGoogleSheet(percentage, remarks) {
+      const message = document.getElementById("submitMessage");
+
+      if (!GOOGLE_SCRIPT_URL) {
+        message.textContent = "Score submission is not connected yet. The game works, and next we will connect it to Google Sheets.";
+        return;
+      }
+
+      const resultData = {
+        firstName: firstName,
+        lastName: lastName,
+        grade: grade,
+        difficulty: difficulty,
+        gameMode: gameMode,
+        score: score,
+        correct: correctCount,
+        total: totalQuestions,
+        percentage: percentage,
+        remarks: remarks
+      };
+
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(resultData)
+      });
+
+      message.textContent = "Your score has been submitted. Thank you!";
+    }
+
+    function quitGame() {
+      const confirmQuit = confirm("Are you sure you want to quit the game?");
+
+      if (confirmQuit) {
+        clearInterval(timer);
+        showScreen("startScreen");
+      }
+    }
+
+    function restartGame() {
+      showScreen("startScreen");
+    }
+  </script>
+
+</body>
+</html>
